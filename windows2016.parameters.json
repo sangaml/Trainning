@@ -9,7 +9,7 @@
       "value": "Password@123"
     },
     "dnsLabelPrefix": {
-      "value": "windowsvm"
+      "value": "trainningdns"
     }
   }
 }
