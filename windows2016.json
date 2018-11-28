@@ -44,6 +44,8 @@
     "publicIPAddressName": "myPublicIP",
     "vmName": "Win2016VM",
     "virtualNetworkName": "MyVNET",
+    "jumpnetworkSecurityGroupName": "winnsg",
+    "securityRulesname": "securitynsg",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
   },
   "resources": [
@@ -53,7 +55,7 @@
       "apiVersion": "2016-01-01",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Standard_DS1_v2"
+        "name": "Standard_LRS"
       },
       "kind": "Storage",
       "properties": {}
@@ -71,10 +73,60 @@
       }
     },
     {
+        "apiVersion": "2018-02-01",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "name": "[variables('jumpnetworkSecurityGroupName')]",
+        "location": "[parameters('location')]",
+        "comments": "NSG for Jump Server RDP",
+        "properties": {
+          "securityRules": [
+            {
+              "name": "rdp_port",
+              "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "3389",
+                "destinationPortRange": "3389",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound"
+              }
+            }
+        ]
+        }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+      "name": "[concat(variables('jumpnetworkSecurityGroupName'), '/', variables('securityRulesname'))]",
+      "apiVersion": "2018-02-01",
+      "location": "[resourceGroup().location]",
+      "comments": "Security Rule for Jump Server RDP",
+      "scale": null,
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpnetworkSecurityGroupName'))]"
+    ],
+      "properties": {
+          "provisioningState": "Succeeded",
+          "protocol": "*",
+          "sourcePortRange": "*",
+          "destinationPortRange": "3389",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": 110,
+          "direction": "Inbound"
+      }
+      
+},
+    {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -85,7 +137,10 @@
           {
             "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+             }
             }
           }
         ]
@@ -128,7 +183,7 @@
       ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_A2"
+          "vmSize": "Standard_DS1_v2"
         },
         "osProfile": {
           "computerName": "[variables('vmName')]",
