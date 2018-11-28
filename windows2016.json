@@ -44,7 +44,7 @@
     "publicIPAddressName": "myPublicIP",
     "vmName": "Win2016VM",
     "virtualNetworkName": "MyVNET",
-    "jumpnetworkSecurityGroupName": "winnsg",
+    "networkSecurityGroupName": "winnsg",
     "securityRulesname": "securitynsg",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
   },
@@ -75,7 +75,7 @@
     {
         "apiVersion": "2018-02-01",
         "type": "Microsoft.Network/networkSecurityGroups",
-        "name": "[variables('jumpnetworkSecurityGroupName')]",
+        "name": "[variables('networkSecurityGroupName')]",
         "location": "[parameters('location')]",
         "comments": "NSG for Jump Server RDP",
         "properties": {
@@ -98,13 +98,13 @@
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-      "name": "[concat(variables('jumpnetworkSecurityGroupName'), '/', variables('securityRulesname'))]",
+      "name": "[concat(variables('networkSecurityGroupName'), '/', variables('securityRulesname'))]",
       "apiVersion": "2018-02-01",
       "location": "[resourceGroup().location]",
       "comments": "Security Rule for Jump Server RDP",
       "scale": null,
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpnetworkSecurityGroupName'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
     ],
       "properties": {
           "provisioningState": "Succeeded",
