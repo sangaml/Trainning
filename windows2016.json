@@ -44,7 +44,7 @@
     "publicIPAddressName": "myPublicIP",
     "vmName": "Win2016VM",
     "virtualNetworkName": "MyVNET",
-    "networkSecurityGroupName": "winnsg",
+    "networkSecurityGroupName": "windowsnsg",
     "securityRulesname": "securitynsg",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
   },
